@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Input Section -->
+        <TextView
+            android:id="@+id/inputLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Input Text:"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/inputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/inputLabel"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Enter text to encrypt/decrypt"
+            android:inputType="textMultiLine"
+            android:minLines="4"
+            android:maxLines="10"
+            android:scrollbars="vertical"/>
+
+        <!-- Password Section -->
+        <TextView
+            android:id="@+id/passwordLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password:"
+            android:layout_below="@id/inputEditText"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passwordLabel"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:inputType="textPassword"/>
+
+        <!-- Remember Password Checkbox -->
+        <CheckBox
+            android:id="@+id/rememberPasswordCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passwordEditText"
+            android:layout_marginStart="16dp"
+            android:text="Remember Password"
+            android:checked="true"/>
+
+        <!-- Encrypt and Decrypt Buttons -->
+        <Button
+            android:id="@+id/encryptTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rememberPasswordCheckBox"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Encrypt Text"
+            android:onClick="performTextEncryption"/>
+
+        <Button
+            android:id="@+id/decryptTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rememberPasswordCheckBox"
+            android:layout_toEndOf="@id/encryptTextButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Decrypt Text"
+            android:onClick="performTextDecryption"/>
+
+        <!-- Copy and Paste Buttons -->
+        <Button
+            android:id="@+id/copyTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/decryptTextButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Copy Output Text"
+            android:onClick="copyToClipboard"/>
+
+        <Button
+            android:id="@+id/pasteTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/decryptTextButton"
+            android:layout_toEndOf="@id/copyTextButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Paste Text"
+            android:onClick="pasteInput"/>
+
+        <!-- File Operations Buttons -->
+        <Button
+            android:id="@+id/pickFileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/copyTextButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Pick File"
+            android:onClick="pickFile"/>
+
+        <Button
+            android:id="@+id/encryptFileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/pickFileButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Encrypt File"
+            android:onClick="performFileEncryption"/>
+
+        <Button
+            android:id="@+id/decryptFileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/pickFileButton"
+            android:layout_toEndOf="@id/encryptFileButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Decrypt File"
+            android:onClick="performFileDecryption"/>
+
+        <!-- Forget Everything Button -->
+        <Button
+            android:id="@+id/forgetEverythingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/decryptFileButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Forget Everything"
+            android:onClick="forgetEverything"/>
+
+        <!-- Output Section -->
+        <TextView
+            android:id="@+id/outputLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Output Text:"
+            android:layout_below="@id/forgetEverythingButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/outputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/outputLabel"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Output will be displayed here"
+            android:inputType="textMultiLine"
+            android:minLines="4"
+            android:maxLines="10"
+            android:scrollbars="vertical"/>
+
+    </RelativeLayout>
+</ScrollView>
