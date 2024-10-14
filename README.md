@@ -19,11 +19,17 @@ File and text encryption in Android offers crucial benefits in protecting sensit
 
 ### Option 1:
 
-[Download](https://github.com/umutcamliyurt/DroidCrypt/releases) from releases
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.nemesis.droidcrypt/)
 
 ### Option 2:
 
-Build it yourself using [Android Studio](https://developer.android.com/studio)
+Download the latest APK from the [Releases Section](https://github.com/umutcamliyurt/DroidCrypt/releases/latest).
+
+### Option 3:
+
+Build it yourself using [Android Studio](https://developer.android.com/studio).
 
 <!-- SCREENSHOTS -->
 ## Screenshots:
