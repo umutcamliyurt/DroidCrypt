@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.nemesis.droidcrypt"
-        minSdk 30
+        minSdk 19
         targetSdk 34
         versionCode 1
         versionName "1.0"

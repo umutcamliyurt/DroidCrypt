@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -157,18 +158,33 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"/>
 
-        <EditText
-            android:id="@+id/outputEditText"
+        <TextView
+            android:id="@+id/outputTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/outputLabel"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:hint="Output will be displayed here"
-            android:inputType="textMultiLine"
             android:minLines="4"
             android:maxLines="10"
-            android:scrollbars="vertical"/>
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textIsSelectable="true"
+            android:scrollbars="vertical"
+            android:visibility="invisible"/>
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/textEncryptProgress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignTop="@id/outputTextView"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            />
+
+
 
     </RelativeLayout>
 </ScrollView>
