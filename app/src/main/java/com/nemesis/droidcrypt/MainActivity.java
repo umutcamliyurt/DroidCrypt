@@ -13,18 +13,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ContentLoadingProgressBar;
 
 import org.bouncycastle.crypto.generators.SCrypt;
 
@@ -38,7 +39,8 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Base64;
+import android.util.Base64;
+import java.util.Locale;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -47,7 +49,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText inputEditText, passwordEditText, outputEditText;
+    private EditText inputEditText, passwordEditText;
+    private TextView outputTextView;
+    private ContentLoadingProgressBar progress;
     private CheckBox rememberPasswordCheckBox;
     private static final int FILE_PICKER_REQUEST_CODE = 123;
     private static final int PERMISSION_REQUEST_CODE = 124;
@@ -61,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
         inputEditText = findViewById(R.id.inputEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
-        outputEditText = findViewById(R.id.outputEditText);
+        outputTextView = findViewById(R.id.outputTextView);
+        progress = findViewById(R.id.textEncryptProgress);
         rememberPasswordCheckBox = findViewById(R.id.rememberPasswordCheckBox);
 
         // Initialize SharedPreferences
@@ -130,16 +135,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processText(boolean isEncryption) {
+        hideOutputText();
         String inputText = inputEditText.getText().toString();
         if (!inputText.isEmpty()) {
-            try {
-                String password = passwordEditText.getText().toString();
-                savePassword(password); // Save password if "Remember Password" is checked
-                String resultText = isEncryption ? encryptText(inputText, password) : decryptText(inputText, password);
-                outputEditText.setText(resultText);
-            } catch (Exception e) {
-                showError((isEncryption ? "Encryption" : "Decryption") + " failed: " + e.getMessage());
-            }
+            progress.show();
+            String password = passwordEditText.getText().toString();
+            savePassword(password); // Save password if "Remember Password" is checked
+            new Thread(() -> {
+                try {
+                    String resultText = isEncryption ? encryptText(inputText, password) : decryptText(inputText, password);
+                    runOnUiThread(() -> {
+                        progress.hide();
+                        showOutputText(resultText);
+                    });
+                } catch (Exception e) {
+                    showError((isEncryption ? "Encryption" : "Decryption") + " failed: " + e.getMessage());
+                }
+            }).start();
         } else {
             showToast("Please enter text to " + (isEncryption ? "encrypt" : "decrypt") + ".");
         }
@@ -156,25 +168,28 @@ public class MainActivity extends AppCompatActivity {
     private void processFile(boolean isEncryption) {
         if (selectedFileUri != null) {
             String password = passwordEditText.getText().toString();
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    startActivity(intent);
-                    showToast("Please enable the Manage All Files Access permission and try again.");
-                    return;
-                }
+            new Thread(() -> {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                        Uri uri = Uri.parse(String.format(Locale.ENGLISH, "package:%s", getApplicationContext().getPackageName()));
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                        startActivity(intent);
+                        showToast("Please enable the Manage All Files Access permission and try again.");
+                        return;
+                    }
 
-                byte[] processedBytes = isEncryption ? encryptFile(selectedFileUri, password) : decryptFile(selectedFileUri, password);
-                if (processedBytes != null) {
-                    String fileName = isEncryption ? getFileName(selectedFileUri) + ".enc" : getFileNameWithoutExtension(selectedFileUri);
-                    saveFile(processedBytes, fileName);
-                    showToast("File " + (isEncryption ? "encrypted" : "decrypted") + " successfully.");
-                } else {
-                    showError((isEncryption ? "Encryption" : "Decryption") + " failed. Check password or file.");
+                    byte[] processedBytes = isEncryption ? encryptFile(selectedFileUri, password) : decryptFile(selectedFileUri, password);
+                    if (processedBytes != null) {
+                        String fileName = isEncryption ? getFileName(selectedFileUri) + ".enc" : getFileNameWithoutExtension(selectedFileUri);
+                        saveFile(processedBytes, fileName);
+                        showToast("File " + (isEncryption ? "encrypted" : "decrypted") + " successfully.");
+                    } else {
+                        showError((isEncryption ? "Encryption" : "Decryption") + " failed. Check password or file.");
+                    }
+                } catch (Exception e) {
+                    showError((isEncryption ? "Encryption" : "Decryption") + " failed: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                showError((isEncryption ? "Encryption" : "Decryption") + " failed: " + e.getMessage());
-            }
+            }).start();
         } else {
             showToast("Please select a file to " + (isEncryption ? "encrypt" : "decrypt") + ".");
         }
@@ -233,11 +248,11 @@ public class MainActivity extends AppCompatActivity {
         Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, secretKey, null);
         byte[] iv = cipher.getIV();
         byte[] cipherText = cipher.doFinal(inputText.getBytes());
-        return Base64.getEncoder().encodeToString(concatenateArrays(salt, iv, cipherText));
+        return Base64.encodeToString(concatenateArrays(salt, iv, cipherText), Base64.DEFAULT);
     }
 
     private String decryptText(String inputText, String password) throws GeneralSecurityException {
-        byte[] inputBytes = Base64.getDecoder().decode(inputText);
+        byte[] inputBytes = Base64.decode(inputText, Base64.DEFAULT);
         byte[] salt = Arrays.copyOfRange(inputBytes, 0, 16);
         byte[] iv = Arrays.copyOfRange(inputBytes, 16, 28);
         byte[] cipherText = Arrays.copyOfRange(inputBytes, 28, inputBytes.length);
@@ -268,7 +283,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private byte[] concatenateArrays(byte[]... arrays) {
-        int totalLength = Arrays.stream(arrays).mapToInt(array -> array.length).sum();
+        int totalLength = 0;
+        for( int i = 0 ; i < arrays.length ; i++ ) {
+            totalLength += arrays[i].length;
+        }
         byte[] result = new byte[totalLength];
         int currentIndex = 0;
         for (byte[] array : arrays) {
@@ -309,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void copyToClipboard(View view) {
-        String outputText = outputEditText.getText().toString();
+        String outputText = outputTextView.getText().toString();
         if (!outputText.isEmpty()) {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Output Text", outputText);
@@ -323,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
             showToast("Output text is empty.");
         }
     }
+
     public void forgetEverything(View view) {
         // Clear SharedPreferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -332,12 +351,22 @@ public class MainActivity extends AppCompatActivity {
         passwordEditText.setText(""); // Clear the password EditText
         // Clear input and output fields
         inputEditText.setText("");
-        outputEditText.setText("");
+        outputTextView.setText("");
 
         // Clear remember password checkbox
         rememberPasswordCheckBox.setChecked(false);
 
         showToast("All data forgotten.");
+    }
+
+    public void showOutputText(String text) {
+        outputTextView.setVisibility(View.VISIBLE);
+        outputTextView.setText(text);
+    }
+
+    public void hideOutputText() {
+        outputTextView.setVisibility(View.INVISIBLE);
+        outputTextView.setText("");
     }
 
     public void pasteInput(View view) {
@@ -357,10 +386,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        });
     }
 }

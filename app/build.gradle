@@ -8,11 +8,12 @@ android {
 
     defaultConfig {
         applicationId "com.nemesis.droidcrypt"
-        minSdk 30
+        minSdk 19
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
 
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -29,7 +30,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    // Add the dependenciesInfo block inside the android block
     dependenciesInfo {
         includeInApk false
         includeInBundle false
@@ -43,4 +43,7 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    // Multidex support library
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
